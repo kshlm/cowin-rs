@@ -1,11 +1,16 @@
 mod api;
 mod client;
 
-use api::location::States;
+use color_eyre::eyre::Result;
+
+use api::location::StatesAndDistricts;
 
 #[async_std::main]
-async fn main() -> surf::Result<()> {
-    let states: States = States::get().await?;
-    dbg!(states);
+async fn main() -> Result<()> {
+    color_eyre::install()?;
+
+    let sd = StatesAndDistricts::get().await?;
+    dbg!(sd);
+
     Ok(())
 }
