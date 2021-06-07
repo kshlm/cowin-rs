@@ -1,9 +1,6 @@
-mod api;
-mod client;
-
 use color_eyre::eyre::Result;
 
-use api::location::StatesAndDistricts;
+use cowin_rs::api::location::StatesAndDistricts;
 
 #[async_std::main]
 async fn main() -> Result<()> {
