@@ -4,7 +4,10 @@ pub(crate) mod serde_date {
 
     const FORMAT: &'static str = "%d-%m-%Y";
 
-    pub(crate) fn serialize<S>(date: &NaiveDate, serializer: S) -> std::result::Result<S::Ok, S::Error>
+    pub(crate) fn serialize<S>(
+        date: &NaiveDate,
+        serializer: S,
+    ) -> std::result::Result<S::Ok, S::Error>
     where
         S: Serializer,
     {
