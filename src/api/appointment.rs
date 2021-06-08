@@ -1,5 +1,5 @@
 use chrono::{Local, NaiveDate, NaiveTime};
-use color_eyre::eyre::{eyre, Result};
+use eyre::{eyre, Result};
 use serde::{Deserialize, Serialize};
 use surf::{http::Method, RequestBuilder};
 use uuid::Uuid;

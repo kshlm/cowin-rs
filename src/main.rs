@@ -1,13 +1,12 @@
 use chrono::NaiveDate;
 use clap::Clap;
-use color_eyre::eyre::Result;
+use eyre::Result;
 
 use cowin_rs::api::{appointment::Sessions, location::StatesAndDistricts};
 
 #[async_std::main]
 async fn main() -> Result<()> {
-    color_eyre::install()?;
-    pretty_env_logger::init();
+    env_logger::init();
 
     let app = App::parse();
     match app.subcmd {

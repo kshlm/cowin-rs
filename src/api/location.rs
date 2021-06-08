@@ -1,6 +1,6 @@
 use async_std::fs;
 use chrono::{DateTime, Duration, Utc};
-use color_eyre::eyre::{eyre, Result, WrapErr};
+use eyre::{eyre, Result, WrapErr};
 use serde::{Deserialize, Serialize};
 use serde_json::from_slice;
 use surf::http::Method;
