@@ -120,12 +120,11 @@ impl StatesAndDistricts {
             districts,
             Utc::now() + Duration::hours(min_ttl),
         );
-        match serde_json::to_vec_pretty(&sd) {
-            Ok(data) => match fs::write(Self::CACHE_FILE, data).await {
-                _ => (),
-            },
-            _ => (),
+
+        if let Ok(data) = serde_json::to_vec_pretty(&sd) {
+            let _ = fs::write(Self::CACHE_FILE, data).await;
         }
+
         Ok(sd)
     }
 

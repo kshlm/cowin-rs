@@ -2,7 +2,7 @@ pub(crate) mod serde_date {
     use chrono::NaiveDate;
     use serde::{self, Deserialize, Deserializer, Serializer};
 
-    const FORMAT: &'static str = "%d-%m-%Y";
+    const FORMAT: &str = "%d-%m-%Y";
 
     pub(crate) fn serialize<S>(
         date: &NaiveDate,

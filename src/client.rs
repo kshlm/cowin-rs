@@ -19,7 +19,7 @@ pub(crate) trait Client {
     }
 
     fn request(method: Method, url: Option<Url>) -> RequestBuilder {
-        RequestBuilder::new(method, url.unwrap_or(Self::url()))
+        RequestBuilder::new(method, url.unwrap_or_else(Self::url))
             .header(headers::USER_AGENT, USER_AGENT)
             .header(headers::ACCEPT, JSON)
             .header(headers::ACCEPT_LANGUAGE, ACCEPT_LANGUAGE)

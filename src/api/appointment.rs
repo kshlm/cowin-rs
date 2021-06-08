@@ -61,7 +61,7 @@ struct SessionsQuery {
 
 impl SessionsQuery {
     fn new(date: Option<NaiveDate>, pincode: Option<String>, district_id: Option<i16>) -> Self {
-        let date = date.unwrap_or(Local::today().naive_local());
+        let date = date.unwrap_or_else(|| Local::today().naive_local());
         Self {
             date,
             pincode,
