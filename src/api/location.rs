@@ -1,6 +1,10 @@
-use async_std::fs;
+use async_std::{
+    fs,
+    sync::{Arc, Mutex},
+    task,
+};
 use chrono::{DateTime, Duration, Utc};
-use eyre::{eyre, Result, WrapErr};
+use eyre::{eyre, Report, Result, WrapErr};
 use serde::{Deserialize, Serialize};
 use serde_json::from_slice;
 use surf::http::Method;
@@ -8,7 +12,7 @@ use surf::http::Method;
 use crate::client::Client;
 use crate::paths::CACHE;
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct State {
     state_id: i16,
     state_name: String,
@@ -21,7 +25,7 @@ impl State {
     }
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct States {
     states: Vec<State>,
     ttl: i16,
@@ -40,7 +44,7 @@ impl States {
     }
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct District {
     district_id: i16,
     district_name: String,
@@ -48,7 +52,7 @@ pub struct District {
     state_id: Option<i16>,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Districts {
     districts: Vec<District>,
     ttl: i16,
@@ -71,7 +75,7 @@ impl Districts {
     }
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct StatesAndDistricts {
     states: Vec<State>,
     districts: Vec<District>,
@@ -98,27 +102,39 @@ impl StatesAndDistricts {
 
     pub async fn refresh() -> Result<Self> {
         let states = States::get().await?;
-        let mut ttls = vec![states.ttl];
 
-        let mut districts: Vec<District> = Vec::new();
-        for state in &states.states {
-            let mut ds = state.get_districts().await?;
-            // ds.districts.iter_mut().map(|d| d.state_id = Some(state.state_id);
-            for d in ds.districts.iter_mut() {
-                d.state_id = Some(state.state_id);
-            }
-            districts.append(&mut ds.districts);
-            ttls.push(ds.ttl);
+        let ttls = Arc::new(Mutex::new(vec![states.ttl]));
+        let districts: Arc<Mutex<Vec<District>>> = Arc::new(Mutex::new(Vec::new()));
+
+        let mut fetch_tasks: Vec<_> = Vec::new();
+
+        for state in states.states.clone() {
+            let ttls = Arc::clone(&ttls);
+            let districts = Arc::clone(&districts);
+
+            let task = task::spawn(async move {
+                let mut ds = state.get_districts().await?;
+                for d in ds.districts.iter_mut() {
+                    d.state_id = Some(state.state_id);
+                }
+                districts.lock_arc().await.append(&mut ds.districts);
+                ttls.lock_arc().await.push(ds.ttl);
+                Ok::<(), Report>(())
+            });
+            fetch_tasks.push(task); }
+
+        for task in fetch_tasks {
+            task.await.unwrap();
         }
 
-        let min_ttl: i64 = match ttls.iter().min() {
+        let min_ttl: i64 = match ttls.lock_arc().await.iter().min() {
             Some(ttl) => ttl.to_owned().into(),
-            _ => unreachable!(),
+            None => unreachable!(),
         };
 
         let sd = Self::new(
             states.states,
-            districts,
+            districts.lock_arc().await.to_vec(),
             Utc::now() + Duration::hours(min_ttl),
         );
 
