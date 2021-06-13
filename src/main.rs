@@ -1,6 +1,7 @@
 use chrono::NaiveDate;
 use clap::Clap;
 use eyre::Result;
+use tabled::{table, Style};
 
 use cowin_rs::api::{appointment::Sessions, location::StatesAndDistricts};
 
@@ -22,7 +23,7 @@ async fn main() -> Result<()> {
             } else {
                 unreachable!();
             };
-            dbg!(sessions);
+            println!("{}", table!(sessions, Style::pseudo_clean()));
         }
     }
     Ok(())

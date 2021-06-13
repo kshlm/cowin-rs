@@ -2,39 +2,68 @@ use chrono::{Local, NaiveDate, NaiveTime};
 use eyre::{eyre, Result};
 use serde::{Deserialize, Serialize};
 use surf::{http::Method, RequestBuilder};
+use tabled::Tabled;
 use uuid::Uuid;
 
-use crate::api::utils::serde_date;
+use crate::api::utils::{opti16_display, serde_date};
 use crate::client::Client;
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Tabled)]
 pub struct Session {
+    #[header("ID", order = 0)]
     center_id: i32,
+    #[header("Center", order = 1)]
     name: String,
+    #[header(hidden)]
     name_l: Option<String>,
+    #[header(hidden)]
     address: Option<String>,
+    #[header(hidden)]
     address_l: Option<String>,
+    #[header(hidden)]
     state_name: String,
+    #[header(hidden)]
     state_name_l: Option<String>,
+    #[header(hidden)]
     district_name: String,
+    #[header(hidden)]
     district_name_l: Option<String>,
+    #[header(hidden)]
     block_name: String,
+    #[header(hidden)]
     block_name_l: Option<String>,
+    #[header(hidden)]
     pincode: i32,
+    #[header(hidden)]
     lat: f32,
+    #[header(hidden)]
     long: f32,
+    #[header(hidden)]
     from: NaiveTime,
+    #[header(hidden)]
     to: NaiveTime,
+    #[header(hidden)]
     fee_type: FeeType,
+    #[header(hidden)]
     fee: String,
+    #[header(hidden)]
     session_id: Uuid,
     #[serde(with = "serde_date")]
+    #[header(hidden)]
     date: NaiveDate,
+    #[header("Capacity", order = 4)]
     available_capacity: i16,
+    #[header("Dose 1")]
+    #[field(display_with = "opti16_display")]
     available_capacity_dose1: Option<i16>,
+    #[header("Dose 2")]
+    #[field(display_with = "opti16_display")]
     available_capacity_dose2: Option<i16>,
+    #[header("Age")]
     min_age_limit: i8,
+    #[header("Vaccine")]
     vaccine: String,
+    #[header(hidden)]
     slots: Vec<String>,
 }
 

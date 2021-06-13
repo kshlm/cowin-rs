@@ -23,3 +23,7 @@ pub(crate) mod serde_date {
         NaiveDate::parse_from_str(&s, FORMAT).map_err(serde::de::Error::custom)
     }
 }
+
+pub(crate) fn opti16_display(s: &Option<i16>) -> i16 {
+    s.unwrap_or_default()
+}
