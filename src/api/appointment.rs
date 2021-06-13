@@ -78,7 +78,7 @@ impl Sessions {
     const BY_PIN: &'static str = "findByPin";
     const BY_DISTRICT: &'static str = "findByDistrict";
 
-    pub async fn get_by_pin(pincode: &str, date: Option<NaiveDate>) -> Result<Self> {
+    pub async fn get_by_pin(pincode: &str, date: Option<NaiveDate>) -> Result<Vec<Session>> {
         let url = match Self::url().join(Self::BY_PIN) {
             Ok(url) => url,
             _ => unreachable!(),
@@ -90,7 +90,10 @@ impl Sessions {
         .await
     }
 
-    pub async fn get_by_district(district_id: i16, date: Option<NaiveDate>) -> Result<Self> {
+    pub async fn get_by_district(
+        district_id: i16,
+        date: Option<NaiveDate>,
+    ) -> Result<Vec<Session>> {
         let url = match Self::url().join(Self::BY_DISTRICT) {
             Ok(url) => url,
             _ => unreachable!(),
@@ -102,12 +105,20 @@ impl Sessions {
         .await
     }
 
-    async fn run(request: RequestBuilder, query: SessionsQuery) -> Result<Self> {
-        request
+    async fn run(request: RequestBuilder, query: SessionsQuery) -> Result<Vec<Session>> {
+        let Self { sessions } = request
             .query(&query)
             .map_err(|e| eyre!(e))?
             .recv_json::<Self>()
             .await
-            .map_err(|e| eyre!(e))
+            .map_err(|e| eyre!(e))?;
+
+        let mut sessions = sessions
+            .into_iter()
+            .filter(|s| s.available_capacity > 0)
+            .collect::<Vec<Session>>();
+
+        sessions.sort_by(|a, b| b.available_capacity.cmp(&a.available_capacity));
+        Ok(sessions)
     }
 }
