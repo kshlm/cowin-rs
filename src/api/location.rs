@@ -6,6 +6,7 @@ use serde_json::from_slice;
 use surf::http::Method;
 
 use crate::client::Client;
+use crate::paths::CACHE;
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct State {
@@ -122,14 +123,14 @@ impl StatesAndDistricts {
         );
 
         if let Ok(data) = serde_json::to_vec_pretty(&sd) {
-            let _ = fs::write(Self::CACHE_FILE, data).await;
+            let _ = fs::write(CACHE.join(Self::CACHE_FILE), data).await;
         }
 
         Ok(sd)
     }
 
     async fn load_cache() -> Result<Self> {
-        let cache_data = fs::read(Self::CACHE_FILE)
+        let cache_data = fs::read(CACHE.join(Self::CACHE_FILE))
             .await
             .wrap_err_with(|| "failed to read cache file")?;
         let sd: Self = from_slice(&cache_data).wrap_err_with(|| "failed to parse cache file")?;
