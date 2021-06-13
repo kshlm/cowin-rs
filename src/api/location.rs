@@ -16,6 +16,7 @@ use crate::paths::CACHE;
 pub struct State {
     state_id: i16,
     state_name: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
     state_name_l: Option<String>,
 }
 
@@ -48,7 +49,9 @@ impl States {
 pub struct District {
     district_id: i16,
     district_name: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
     district_name_l: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     state_id: Option<i16>,
 }
 
