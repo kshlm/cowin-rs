@@ -23,7 +23,14 @@ async fn main() -> Result<()> {
             } else {
                 unreachable!();
             };
-            println!("{}", table!(sessions, Style::pseudo_clean()));
+            println!(
+                "{}",
+                if sessions.len() > 0 {
+                    table!(sessions, Style::pseudo_clean())
+                } else {
+                    String::from("No appointments found")
+                }
+            );
         }
     }
     Ok(())
