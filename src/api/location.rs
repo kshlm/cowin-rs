@@ -111,7 +111,7 @@ impl StatesAndDistricts {
 
         let mut fetch_tasks: Vec<_> = Vec::new();
 
-        for state in states.states.clone() {
+        states.states.clone().into_iter().for_each(|state| {
             let ttls = Arc::clone(&ttls);
             let districts = Arc::clone(&districts);
 
@@ -124,7 +124,8 @@ impl StatesAndDistricts {
                 ttls.lock_arc().await.push(ds.ttl);
                 Ok::<(), Report>(())
             });
-            fetch_tasks.push(task); }
+            fetch_tasks.push(task);
+        });
 
         for task in fetch_tasks {
             task.await.unwrap();
