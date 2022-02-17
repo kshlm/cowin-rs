@@ -1,7 +1,7 @@
 use chrono::NaiveDate;
-use clap::Clap;
+use clap::{Parser, Subcommand};
+use cli_table::{print_stdout, WithTitle};
 use eyre::Result;
-use tabled::{table, Style};
 
 use cowin_rs::api::{appointment::Sessions, location::StatesAndDistricts};
 
@@ -23,33 +23,30 @@ async fn main() -> Result<()> {
             } else {
                 unreachable!();
             };
-            println!(
-                "{}",
-                if sessions.len() > 0 {
-                    table!(sessions, Style::pseudo_clean())
-                } else {
-                    String::from("No appointments found")
-                }
-            );
+            if !sessions.is_empty() {
+                assert!(print_stdout(sessions.with_title()).is_ok());
+            } else {
+                println!("No appointments found");
+            }
         }
     }
     Ok(())
 }
 
-#[derive(Clap, Debug)]
+#[derive(Parser, Debug)]
 #[clap(name = "cowin-rs")]
 struct App {
     #[clap(subcommand)]
     subcmd: SubCommand,
 }
 
-#[derive(Clap, Debug)]
+#[derive(Subcommand, Debug)]
 enum SubCommand {
     DistrictId(DistrictId),
     Appointments(Appointments),
 }
 
-#[derive(Clap, Debug)]
+#[derive(Parser, Debug)]
 struct DistrictId {
     #[clap(long, short)]
     state: String,
@@ -57,7 +54,7 @@ struct DistrictId {
     district: String,
 }
 
-#[derive(Clap, Debug)]
+#[derive(Parser, Debug)]
 struct Appointments {
     #[clap(
         alias = "pin",

@@ -1,69 +1,67 @@
 use chrono::{Local, NaiveDate, NaiveTime};
+use cli_table::Table;
 use eyre::{eyre, Result};
 use serde::{Deserialize, Serialize};
 use surf::{http::Method, RequestBuilder};
-use tabled::Tabled;
 use uuid::Uuid;
 
 use crate::api::utils::{opti16_display, serde_date};
 use crate::client::Client;
 
-#[derive(Debug, Deserialize, Tabled)]
+#[derive(Debug, Deserialize, Table)]
 pub struct Session {
-    #[header("ID", order = 0)]
+    #[table(title = "ID", order = 0)]
     center_id: i32,
-    #[header("Center", order = 1)]
+    #[table(title = "Center", order = 1)]
     name: String,
-    #[header(hidden)]
+    #[table(skip)]
     name_l: Option<String>,
-    #[header(hidden)]
+    #[table(skip)]
     address: Option<String>,
-    #[header(hidden)]
+    #[table(skip)]
     address_l: Option<String>,
-    #[header(hidden)]
+    #[table(skip)]
     state_name: String,
-    #[header(hidden)]
+    #[table(skip)]
     state_name_l: Option<String>,
-    #[header(hidden)]
+    #[table(skip)]
     district_name: String,
-    #[header(hidden)]
+    #[table(skip)]
     district_name_l: Option<String>,
-    #[header(hidden)]
+    #[table(skip)]
     block_name: String,
-    #[header(hidden)]
+    #[table(skip)]
     block_name_l: Option<String>,
-    #[header(hidden)]
+    #[table(skip)]
     pincode: i32,
-    #[header(hidden)]
+    #[table(skip)]
     lat: f32,
-    #[header(hidden)]
+    #[table(skip)]
     long: f32,
-    #[header(hidden)]
+    #[table(skip)]
     from: NaiveTime,
-    #[header(hidden)]
+    #[table(skip)]
     to: NaiveTime,
-    #[header(hidden)]
+    #[table(skip)]
     fee_type: FeeType,
-    #[header(hidden)]
+    #[table(skip)]
     fee: String,
-    #[header(hidden)]
+    #[table(skip)]
     session_id: Uuid,
     #[serde(with = "serde_date")]
-    #[header(hidden)]
+    #[table(skip)]
     date: NaiveDate,
-    #[header("Capacity", order = 4)]
+    #[table(title = "Capacity", order = 4)]
     available_capacity: i16,
-    #[header("Dose 1")]
-    #[field(display_with = "opti16_display")]
+    #[table(title = "Dose 1", display_fn = "opti16_display")]
     available_capacity_dose1: Option<i16>,
-    #[header("Dose 2")]
-    #[field(display_with = "opti16_display")]
+    #[table(title = "Dose 2", display_fn = "opti16_display")]
     available_capacity_dose2: Option<i16>,
-    #[header("Age")]
+    #[table(title = "Age")]
     min_age_limit: i8,
-    #[header("Vaccine")]
+    #[table(title = "Vaccine")]
     vaccine: String,
-    #[header(hidden)]
+    #[table(skip)]
     slots: Vec<String>,
 }
 
