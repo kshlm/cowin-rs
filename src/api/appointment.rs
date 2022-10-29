@@ -1,9 +1,8 @@
-use chrono::{Local, NaiveDate, NaiveTime};
+use chrono::{Local, NaiveDate};
 use cli_table::Table;
 use eyre::{eyre, Result};
 use serde::{Deserialize, Serialize};
 use surf::{http::Method, RequestBuilder};
-use uuid::Uuid;
 
 use crate::api::utils::{opti16_display, serde_date};
 use crate::client::Client;
@@ -14,43 +13,6 @@ pub struct Session {
     center_id: i32,
     #[table(title = "Center", order = 1)]
     name: String,
-    #[table(skip)]
-    name_l: Option<String>,
-    #[table(skip)]
-    address: Option<String>,
-    #[table(skip)]
-    address_l: Option<String>,
-    #[table(skip)]
-    state_name: String,
-    #[table(skip)]
-    state_name_l: Option<String>,
-    #[table(skip)]
-    district_name: String,
-    #[table(skip)]
-    district_name_l: Option<String>,
-    #[table(skip)]
-    block_name: String,
-    #[table(skip)]
-    block_name_l: Option<String>,
-    #[table(skip)]
-    pincode: i32,
-    #[table(skip)]
-    lat: f32,
-    #[table(skip)]
-    long: f32,
-    #[table(skip)]
-    from: NaiveTime,
-    #[table(skip)]
-    to: NaiveTime,
-    #[table(skip)]
-    fee_type: FeeType,
-    #[table(skip)]
-    fee: String,
-    #[table(skip)]
-    session_id: Uuid,
-    #[serde(with = "serde_date")]
-    #[table(skip)]
-    date: NaiveDate,
     #[table(title = "Capacity", order = 4)]
     available_capacity: i16,
     #[table(title = "Dose 1", display_fn = "opti16_display")]
@@ -61,8 +23,6 @@ pub struct Session {
     min_age_limit: i8,
     #[table(title = "Vaccine")]
     vaccine: String,
-    #[table(skip)]
-    slots: Vec<String>,
 }
 
 #[derive(Debug, Deserialize)]

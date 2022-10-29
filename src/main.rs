@@ -1,5 +1,5 @@
 use chrono::NaiveDate;
-use clap::{Parser, Subcommand};
+use clap::{Args, Parser, Subcommand};
 use cli_table::{print_stdout, WithTitle};
 use eyre::Result;
 
@@ -34,9 +34,9 @@ async fn main() -> Result<()> {
 }
 
 #[derive(Parser, Debug)]
-#[clap(name = "cowin-rs")]
+#[command(name = "cowin-rs")]
 struct App {
-    #[clap(subcommand)]
+    #[command(subcommand)]
     subcmd: SubCommand,
 }
 
@@ -46,30 +46,30 @@ enum SubCommand {
     Appointments(Appointments),
 }
 
-#[derive(Parser, Debug)]
+#[derive(Args, Debug)]
 struct DistrictId {
-    #[clap(long, short)]
+    #[arg(long, short)]
     state: String,
-    #[clap(long, short)]
+    #[arg(long, short)]
     district: String,
 }
 
-#[derive(Parser, Debug)]
+#[derive(Args, Debug)]
 struct Appointments {
-    #[clap(
+    #[arg(
         alias = "pin",
         long,
-        required_unless_present = "district-id",
-        conflicts_with = "district-id"
+        required_unless_present = "district_id",
+        conflicts_with = "district_id"
     )]
     pincode: Option<String>,
-    #[clap(
+    #[arg(
         alias = "district",
         long,
         required_unless_present = "pincode",
         conflicts_with = "pincode"
     )]
     district_id: Option<i16>,
-    #[clap(long)]
+    #[arg(long)]
     date: Option<NaiveDate>,
 }
