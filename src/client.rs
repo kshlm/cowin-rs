@@ -1,7 +1,4 @@
-use surf::{
-    http::{headers, mime::JSON, Method},
-    RequestBuilder, Url,
-};
+use reqwest::{header, Client as rClient, Method, RequestBuilder, Url};
 
 const USER_AGENT: &str = "cowin-rs";
 const ACCEPT_LANGUAGE: &str = "en_US";
@@ -19,9 +16,10 @@ pub(crate) trait Client {
     }
 
     fn request(method: Method, url: Option<Url>) -> RequestBuilder {
-        RequestBuilder::new(method, url.unwrap_or_else(Self::url))
-            .header(headers::USER_AGENT, USER_AGENT)
-            .header(headers::ACCEPT, JSON)
-            .header(headers::ACCEPT_LANGUAGE, ACCEPT_LANGUAGE)
+        rClient::new()
+            .request(method, url.unwrap_or_else(Self::url))
+            .header(header::USER_AGENT, USER_AGENT)
+            .header(header::ACCEPT, mime::JSON.as_str())
+            .header(header::ACCEPT_LANGUAGE, ACCEPT_LANGUAGE)
     }
 }

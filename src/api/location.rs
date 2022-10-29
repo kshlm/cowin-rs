@@ -1,13 +1,11 @@
-use async_std::{
-    fs,
-    sync::{Arc, Mutex},
-    task,
-};
+use std::sync::Arc;
+
 use chrono::{DateTime, Duration, Utc};
 use eyre::{eyre, Report, Result, WrapErr};
+use reqwest::Method;
 use serde::{Deserialize, Serialize};
 use serde_json::from_slice;
-use surf::http::Method;
+use tokio::{fs, sync::Mutex, task};
 
 use crate::client::Client;
 use crate::paths::CACHE;
@@ -38,8 +36,11 @@ impl Client for States {
 
 impl States {
     pub async fn get() -> Result<Self> {
-        Self::request(Method::Get, None)
-            .recv_json::<Self>()
+        Self::request(Method::GET, None)
+            .send()
+            .await
+            .map_err(|e| eyre!(e))?
+            .json::<Self>()
             .await
             .map_err(|e| eyre!(e))
     }
@@ -71,8 +72,11 @@ impl Districts {
             Ok(url) => url,
             _ => unreachable!(),
         };
-        Self::request(Method::Get, Some(url))
-            .recv_json::<Self>()
+        Self::request(Method::GET, Some(url))
+            .send()
+            .await
+            .map_err(|e| eyre!(e))?
+            .json::<Self>()
             .await
             .map_err(|e| eyre!(e))
     }
@@ -120,25 +124,25 @@ impl StatesAndDistricts {
                 for d in ds.districts.iter_mut() {
                     d.state_id = Some(state.state_id);
                 }
-                districts.lock_arc().await.append(&mut ds.districts);
-                ttls.lock_arc().await.push(ds.ttl);
+                districts.lock().await.append(&mut ds.districts);
+                ttls.lock().await.push(ds.ttl);
                 Ok::<(), Report>(())
             });
             fetch_tasks.push(task);
         });
 
         for task in fetch_tasks {
-            task.await.unwrap();
+            task.await.unwrap().ok();
         }
 
-        let min_ttl: i64 = match ttls.lock_arc().await.iter().min() {
+        let min_ttl: i64 = match ttls.lock().await.iter().min() {
             Some(ttl) => ttl.to_owned().into(),
             None => unreachable!(),
         };
 
         let sd = Self::new(
             states.states,
-            districts.lock_arc().await.to_vec(),
+            districts.lock().await.to_vec(),
             Utc::now() + Duration::hours(min_ttl),
         );
 

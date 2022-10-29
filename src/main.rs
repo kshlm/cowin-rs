@@ -5,7 +5,7 @@ use eyre::Result;
 
 use cowin_rs::api::{appointment::Sessions, location::StatesAndDistricts};
 
-#[async_std::main]
+#[tokio::main]
 async fn main() -> Result<()> {
     env_logger::init();
 

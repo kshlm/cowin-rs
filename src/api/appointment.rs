@@ -1,8 +1,8 @@
 use chrono::{Local, NaiveDate};
 use cli_table::Table;
 use eyre::{eyre, Result};
+use reqwest::{Method, RequestBuilder};
 use serde::{Deserialize, Serialize};
-use surf::{http::Method, RequestBuilder};
 
 use crate::api::utils::{opti16_display, serde_date};
 use crate::client::Client;
@@ -71,7 +71,7 @@ impl Sessions {
             _ => unreachable!(),
         };
         Self::run(
-            Self::request(Method::Get, Some(url)),
+            Self::request(Method::GET, Some(url)),
             SessionsQuery::new(date, Some(pincode.to_string()), None),
         )
         .await
@@ -86,7 +86,7 @@ impl Sessions {
             _ => unreachable!(),
         };
         Self::run(
-            Self::request(Method::Get, Some(url)),
+            Self::request(Method::GET, Some(url)),
             SessionsQuery::new(date, None, Some(district_id)),
         )
         .await
@@ -95,8 +95,10 @@ impl Sessions {
     async fn run(request: RequestBuilder, query: SessionsQuery) -> Result<Vec<Session>> {
         let Self { sessions } = request
             .query(&query)
+            .send()
+            .await
             .map_err(|e| eyre!(e))?
-            .recv_json::<Self>()
+            .json::<Self>()
             .await
             .map_err(|e| eyre!(e))?;
 
